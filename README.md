@@ -1,0 +1,3 @@
+Hey so, the file I just added, which I think is called TenMinutePhysics, is basically the 2-d collision function using TenMinutePhysics's method.  I added a bunch of comments so hopefully it's easier to understand, and I have a little tester thing at the bottom.
+Also, just so we're on the same page, my function takes in a 4x2 numpy array with 4 2-elt arrays, those being: position (x,y), velocity (x,y), mass, and radius. The mass and radius 2-elt arrays just have (mass, 0) and (radius, 0). (I used parantheses, but technically they're brackets [] in the code. You get the idea.)
+All we need to do now is add your wall functions and find a way to model it visually. And test it a shit ton.
