@@ -12,8 +12,13 @@ clock = pygame.time.Clock()
 #table = np.array([[0, 0, 250, 250], [0, 0, 750,250],[0,0,780,15]])  # rows are balls (0 = cue, 1 = 1,...), columns are properties of balls (x velocity, y velocity, xpos, ypos)
 ball0 = np.array([[250., 250.], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
 ball1 = np.array([[750., 250.], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
+ball2 = np.array([[750.+np.sqrt(200), 250.-np.sqrt(200)], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
+ball3 = np.array([[750.+np.sqrt(200), 250.+np.sqrt(200)], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
+ball4 = np.array([[750.+(2*np.sqrt(200)), 250.-(2*np.sqrt(200))], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
+ball5 = np.array([[750.+(2*np.sqrt(200)), 250.], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
+ball6 = np.array([[750.+(2*np.sqrt(200)), 250.+(2*np.sqrt(200))], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
 
-balls = np.array([ball0, ball1])
+balls = np.array([ball0, ball1, ball2, ball3, ball4, ball5, ball6])
 
 def add_vectors(v1, v2):
     return v1 + v2
@@ -162,7 +167,6 @@ def horizontal_wall_check(ball):
 
 def pocket_check(ball, pocket):
     if np.sqrt((ball[0, 0] - pocket[0]) ** 2 + (ball[0, 1] - pocket[1]) ** 2) <= POCKET_RADIUS:
-        ball[0], ball[1] = ([0, 0]), ([0, 1000])
         return True
 
 
@@ -194,7 +198,11 @@ def run(vx, vy):
         #draw_ball(ball0, "white", BALL_RADIUS)
         pygame.draw.circle(window, "white", (balls[0][0]), BALL_RADIUS)
         pygame.draw.circle(window, "yellow", (balls[1][0]), BALL_RADIUS)
-        #pygame.draw.circle(window, "blue", (table[2, 2], table[2, 3]), BALL_RADIUS)
+        pygame.draw.circle(window, "blue", (balls[2][0]), BALL_RADIUS)
+        pygame.draw.circle(window, "red", (balls[3][0]), BALL_RADIUS)
+        pygame.draw.circle(window, "purple", (balls[4][0]), BALL_RADIUS)
+        pygame.draw.circle(window, "orange", (balls[5][0]), BALL_RADIUS)
+        pygame.draw.circle(window, "green", (balls[6][0]), BALL_RADIUS)
 
         pocket_centers = np.array(
             [[.5 * POCKET_RADIUS, .5 * POCKET_RADIUS], [WIDTH - .5 * POCKET_RADIUS, .5 * POCKET_RADIUS],
@@ -223,6 +231,9 @@ def run(vx, vy):
                     #print(pocket)
                     if pocket_check(ball_n, pocket):
                         print(ball_n, ' hit a pocket.')
+                        ball_n[0], ball_n[1] = ([500, 1000]), ([0, 0])
+                if np.sum(ball_n[1]**2) < 10:
+                    ball_n[1] = ([0,0])
 
         pygame.display.flip()
         clock.tick(fps)
