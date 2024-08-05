@@ -1,0 +1,119 @@
+import numpy as np
+import pygame
+
+pygame.init()
+
+
+WIDTH, HEIGHT = 1000, 500
+BALL_RADIUS = 10
+POCKET_RADIUS = 20
+window = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
+
+
+table = np.array([[0, 0, 250, 15], [0, 0, 750,250],[0,0,780,15]])  # rows are balls (0 = cue, 1 = 1,...), columns are properties of balls (x velocity, y velocity, xpos, ypos)
+
+
+def collision(n, m):
+    table[n, 0], table[m, 0] = 0.95 * table[m, 0], 0.95 * table[n, 0]
+    table[n, 1], table[m, 1] = 0.95 * table[m, 1], 0.95 * table[n, 1]
+
+
+def horizontal_wall(n):
+    table[n, 1] = -0.95 * table[n, 1]
+
+
+def vertical_wall(n):
+    table[n, 0] = -0.95 * table[n, 0]
+
+
+def collision_check(n, m):
+    if table[n, 2] > table[m, 2]:
+        right_ball = n
+        left_ball = m
+    else:
+        right_ball = m
+        left_ball = n
+    if np.sqrt((table[right_ball, 2] - table[left_ball, 2])**2 + (table[right_ball, 3] - table[left_ball, 3])**2) < 2*BALL_RADIUS and table[right_ball, 0] < table[left_ball, 0]:
+        return True
+
+
+def vertical_wall_check(n):
+    if table[n, 2] >= 1000-BALL_RADIUS:
+        wall = 1  # Right wall
+    elif table[n, 2] <= BALL_RADIUS:
+        wall = -1  # Left wall
+    else:
+        wall = 0
+
+    if wall == 1 and table[n, 0] > 0:
+        return True
+    elif wall == -1 and table[n, 0] < 0:
+        return True
+    else:
+        return False
+
+def pocket_check(n, pocket):
+    if np.sqrt((table[n, 2]-pocket[0])**2+(table[n,3]-pocket[1])**2) <= POCKET_RADIUS:
+        table[n,0], table[n,1], table[n,2], table[n,3] = 0, 0, 0, 1000
+        return True
+
+
+def run(vx, vy):
+    run = True
+    clock = pygame.time.Clock()
+    fps = 60
+    dt = 1 / fps  # interval of time between "frames"
+    gamma = 0.3 # damping factor
+    table[0, 0], table[0, 1] = vx, vy  # Initial velocity of cue ball
+    print(table)
+
+    while np.sqrt(np.sum(table[:, 0] ** 2)) > 10:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+                break
+        window.fill((0,100,0))
+
+        # Pockets
+        pygame.draw.circle(window, "black", (.5 * POCKET_RADIUS, .5 * POCKET_RADIUS), POCKET_RADIUS)
+        pygame.draw.circle(window, "black", (WIDTH - .5 * POCKET_RADIUS, .5 * POCKET_RADIUS), POCKET_RADIUS)
+        pygame.draw.circle(window, "black", (.5 * POCKET_RADIUS, HEIGHT - .5 * POCKET_RADIUS), POCKET_RADIUS)
+        pygame.draw.circle(window, "black", (WIDTH - .5 * POCKET_RADIUS, HEIGHT - .5 * POCKET_RADIUS), POCKET_RADIUS)
+
+        # Balls
+        pygame.draw.circle(window, ("white"), (table[0, 2], table[0, 3]), BALL_RADIUS)
+        pygame.draw.circle(window, "yellow", (table[1, 2], table[1, 3]), BALL_RADIUS)
+        pygame.draw.circle(window, "blue", (table[2, 2], table[2, 3]), BALL_RADIUS)
+
+
+        pocket_centers = np.array([[.5*POCKET_RADIUS,.5*POCKET_RADIUS],[WIDTH-.5*POCKET_RADIUS,.5*POCKET_RADIUS],[.5*POCKET_RADIUS,HEIGHT-.5*POCKET_RADIUS],[WIDTH-.5*POCKET_RADIUS,HEIGHT-.5*POCKET_RADIUS]])
+
+        for n in range(len(table)):
+            table[n, 2] = table[n, 2] + (table[n, 0] * dt)  # xf = x0 + vx*dt
+            table[n, 0] = table[n, 0] - (table[n, 0] * gamma*dt) # vf = v0 - gamma*v0*dt
+
+        for n in range(len(table)):
+            for m in range(2):
+                if n != m and collision_check(n, m):  # Collisions between balls
+                    collision(n, m)
+                    print('Collision between ', n, ' and ', m)
+                    print(table)
+                if vertical_wall_check(n):  # Collisions with vertical walls
+                    vertical_wall(n)
+                    print(n, ' hit a wall.')
+                    print(table)
+                for pocket in pocket_centers:
+                    #print(pocket)
+                    if pocket_check(n,pocket):
+                       print(n, ' hit a pocket.')
+
+
+        pygame.display.flip()
+        clock.tick(fps)
+        pygame.display.update()
+    pygame.quit()
+    run = False
+
+
+run(500, 0)
