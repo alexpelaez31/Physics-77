@@ -4,19 +4,19 @@ import pygame
 pygame.init()
 
 WIDTH, HEIGHT = 1000, 500
-BALL_RADIUS = 10
-POCKET_RADIUS = 20
+BALL_RADIUS = 20
+POCKET_RADIUS = 40
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
 #table = np.array([[0, 0, 250, 250], [0, 0, 750,250],[0,0,780,15]])  # rows are balls (0 = cue, 1 = 1,...), columns are properties of balls (x velocity, y velocity, xpos, ypos)
 ball0 = np.array([[250., 250.], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
 ball1 = np.array([[750., 250.], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
-ball2 = np.array([[750.+np.sqrt(200), 250.-np.sqrt(200)], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
-ball3 = np.array([[750.+np.sqrt(200), 250.+np.sqrt(200)], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
-ball4 = np.array([[750.+(2*np.sqrt(200)), 250.-(2*np.sqrt(200))], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
-ball5 = np.array([[750.+(2*np.sqrt(200)), 250.], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
-ball6 = np.array([[750.+(2*np.sqrt(200)), 250.+(2*np.sqrt(200))], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
+ball2 = np.array([[750.+BALL_RADIUS*np.sqrt(2), 250.-BALL_RADIUS*np.sqrt(2)], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
+ball3 = np.array([[750.+BALL_RADIUS*np.sqrt(2), 250.+BALL_RADIUS*np.sqrt(2)], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
+ball4 = np.array([[750.+(2*BALL_RADIUS*np.sqrt(2)), 250.-(2*BALL_RADIUS*np.sqrt(2))], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
+ball5 = np.array([[750.+(2*BALL_RADIUS*np.sqrt(2)), 250.], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
+ball6 = np.array([[750.+(2*BALL_RADIUS*np.sqrt(2)), 250.+(2*BALL_RADIUS*np.sqrt(2))], [0., 0.], [20., 0.], [BALL_RADIUS, 0.]])
 
 balls = np.array([ball0, ball1, ball2, ball3, ball4, ball5, ball6])
 
@@ -127,11 +127,20 @@ def collision_check(n, m):
     else:
         right_ball = m
         left_ball = n
+    if n[1,1] < m[1,1]:
+        top_ball = n
+        bottom_ball = m
+    else:
+        top_ball = m
+        bottom_ball = n
     if np.sqrt(
             (right_ball[0, 0] - left_ball[0, 0]) ** 2 + (right_ball[0, 1] - left_ball[0, 1]) ** 2) < 2 * BALL_RADIUS and \
             right_ball[0, 0] < left_ball[0, 0]:
         return True
-
+    if np.sqrt(
+            (top_ball[0, 0] - bottom_ball[0, 0]) ** 2 + (top_ball[0, 1] - bottom_ball[0, 1]) ** 2) < 2 * BALL_RADIUS and \
+            top_ball[0, 0] > bottom_ball[0, 0]:
+        return True
 
 def vertical_wall_check(ball):
     if ball[0, 0] >= WIDTH - BALL_RADIUS:
@@ -170,15 +179,15 @@ def pocket_check(ball, pocket):
         return True
 
 
-def run(vx, vy):
+def run():
     run = True
     clock = pygame.time.Clock()
     fps = 60
     dt = 1 / fps
-    gamma = 0.3  # damping factor
+    gamma = 0.5  # damping factor
     #table[0, 0], table[0, 1] = vx, vy  # Initial velocity of cue ball
     #print(table)
-    balls[0][1] = ([vx, vy])
+    #balls[0][1] = ([vx, vy])
     #print(ball0)
 
     while run:
@@ -187,6 +196,14 @@ def run(vx, vy):
                 run = False
                 break
         window.fill((0, 100, 0))
+
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            distance = mouse_pos - balls[0][0]
+            balls[0][1]= distance*5
+
+
 
         # Pockets
         pygame.draw.circle(window, "black", (.5 * POCKET_RADIUS, .5 * POCKET_RADIUS), POCKET_RADIUS)
@@ -242,4 +259,4 @@ def run(vx, vy):
     #run = False
 
 
-run(500, 500)
+run(
