@@ -1,4 +1,15 @@
 """You need pygame installed in order to run this program!!!"""
+"""
+Sources:
+pygame Documentation: https://www.pygame.org/docs/ref/mouse.html
+- used to learn about functions to visualize our program
+Ten Minute Physics: https://youtu.be/ThhdlMbGT5g
+- used to learn how ball collisions can be handled using a direction vector between the centers
+- helped with making cons of momentum 1-d instead of 2-d
+Tech with Tim: https://youtu.be/tLsi2DeUsak?si=JLFxluVauD_K4d9a5
+- intro to pygame (he uses pymunk too, but we didn't)
+"""
+
 
 import numpy as np
 import pygame
